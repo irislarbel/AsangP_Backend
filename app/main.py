@@ -1,7 +1,7 @@
 from fastapi import FastAPI
+from fastapi.middleware.cors import CORSMiddleware
 from app.api.v1.endpoints import api_router
 from app.core.database import engine, Base
-# 중요: Base.metadata가 모든 모델을 인지할 수 있도록 모델들을 임포트해야 합니다.
 import app.models 
 
 # 앱 시작 시 데이터베이스 테이블 생성
@@ -11,6 +11,20 @@ app = FastAPI(
     title="AsangP Congestion Monitoring API",
     description="ESP32 WiFi/BT 신호를 활용한 혼잡도 모니터링 시스템 백엔드",
     version="0.1.0"
+)
+
+# CORS 설정
+origins = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # API 라우터 등록
