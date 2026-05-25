@@ -5,6 +5,7 @@ from app.api.schemas.space import SpaceCreate, SpaceUpdate
 
 class SpaceService:
     def __init__(self, db: Session):
+        self.db = db
         self.repository = SpaceRepository(db)
 
     def get_all_spaces(self):
@@ -20,7 +21,10 @@ class SpaceService:
         return space
 
     def create_space(self, space_in: SpaceCreate):
-        return self.repository.create(space_in)
+        space = self.repository.create(space_in)
+        self.db.commit()
+        self.db.refresh(space)
+        return space
 
     def update_space(self, space_id: int, space_in: SpaceUpdate):
         space = self.repository.update(space_id, space_in)
@@ -29,6 +33,8 @@ class SpaceService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Space with id {space_id} not found"
             )
+        self.db.commit()
+        self.db.refresh(space)
         return space
 
     def delete_space(self, space_id: int):
@@ -38,4 +44,5 @@ class SpaceService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Space with id {space_id} not found"
             )
+        self.db.commit()
         return {"message": "Successfully deleted"}

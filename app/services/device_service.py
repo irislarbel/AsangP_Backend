@@ -6,6 +6,7 @@ from app.api.schemas.device import ScannerDeviceCreate, ScannerDeviceUpdate
 
 class DeviceService:
     def __init__(self, db: Session):
+        self.db = db
         self.repository = DeviceRepository(db)
         self.space_repository = SpaceRepository(db)
 
@@ -36,7 +37,10 @@ class DeviceService:
                 detail=f"Device with id {device_in.id} already registered"
             )
             
-        return self.repository.create(device_in)
+        device = self.repository.create(device_in)
+        self.db.commit()
+        self.db.refresh(device)
+        return device
 
     def update_device(self, device_id: str, device_in: ScannerDeviceUpdate):
         device = self.repository.update(device_id, device_in)
@@ -45,4 +49,6 @@ class DeviceService:
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail=f"Device with id {device_id} not found"
             )
+        self.db.commit()
+        self.db.refresh(device)
         return device

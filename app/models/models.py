@@ -38,7 +38,7 @@ class CongestionData(Base):
     __tablename__ = "congestion_data"
 
     id = Column(Integer, primary_key=True, index=True)
-    device_id = Column(String, ForeignKey("scanner_devices.id"), nullable=False)
+    device_id = Column(String, ForeignKey("scanner_devices.id"), unique=True, index=True, nullable=False)
     count = Column(Float, default=0.0)
     result = Column(String, nullable=False)
     timestamp = Column(DateTime, default=get_kst_now)
@@ -47,13 +47,15 @@ class CongestionData(Base):
     device = relationship("ScannerDevice", back_populates="congestion_history")
 
 class RawScannerData(Base):
-    """센서로부터 받은 원본 데이터를 기록하는 로그 테이블"""
+    """센서로부터 받은 원본 데이터와 계산 결과를 기록하는 로그 테이블"""
     __tablename__ = "raw_scanner_data"
 
     id = Column(Integer, primary_key=True, index=True)
-    device_id = Column(String, ForeignKey("scanner_devices.id"), nullable=False)
+    device_id = Column(String, ForeignKey("scanner_devices.id"), index=True, nullable=False)
     wifi_count = Column(Integer, nullable=False)
     bt_count = Column(Integer, nullable=False)
+    count = Column(Float, nullable=True)  # 계산된 점수
+    result = Column(String, nullable=True) # 판정 결과
     timestamp = Column(DateTime, default=get_kst_now)
 
 

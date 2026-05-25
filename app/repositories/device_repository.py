@@ -19,8 +19,7 @@ class DeviceRepository:
             location_description=device_in.location_description
         )
         self.db.add(db_device)
-        self.db.commit()
-        self.db.refresh(db_device)
+        self.db.flush()
         return db_device
 
     def update(self, device_id: str, device_in: ScannerDeviceUpdate):
@@ -29,14 +28,12 @@ class DeviceRepository:
             update_data = device_in.model_dump(exclude_unset=True)
             for key, value in update_data.items():
                 setattr(db_device, key, value)
-            self.db.commit()
-            self.db.refresh(db_device)
+            self.db.flush()
         return db_device
 
     def update_last_seen(self, device_id: str):
         db_device = self.get_by_id(device_id)
         if db_device:
             db_device.last_seen = get_kst_now()
-            self.db.commit()
-            self.db.refresh(db_device)
+            self.db.flush()
         return db_device
