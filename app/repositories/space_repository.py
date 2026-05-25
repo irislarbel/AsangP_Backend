@@ -18,8 +18,7 @@ class SpaceRepository:
             description=space_in.description
         )
         self.db.add(db_space)
-        self.db.commit()
-        self.db.refresh(db_space)
+        self.db.flush()
         return db_space
 
     def update(self, space_id: int, space_in: SpaceUpdate):
@@ -28,14 +27,13 @@ class SpaceRepository:
             update_data = space_in.model_dump(exclude_unset=True)
             for key, value in update_data.items():
                 setattr(db_space, key, value)
-            self.db.commit()
-            self.db.refresh(db_space)
+            self.db.flush()
         return db_space
 
     def delete(self, space_id: int):
         db_space = self.get_by_id(space_id)
         if db_space:
             self.db.delete(db_space)
-            self.db.commit()
+            self.db.flush()
             return True
         return False

@@ -38,7 +38,7 @@ class CongestionData(Base):
     __tablename__ = "congestion_data"
 
     id = Column(Integer, primary_key=True, index=True)
-    device_id = Column(String, ForeignKey("scanner_devices.id"), nullable=False)
+    device_id = Column(String, ForeignKey("scanner_devices.id"), unique=True, index=True, nullable=False)
     count = Column(Float, default=0.0)
     result = Column(String, nullable=False)
     timestamp = Column(DateTime, default=get_kst_now)
@@ -51,7 +51,7 @@ class RawScannerData(Base):
     __tablename__ = "raw_scanner_data"
 
     id = Column(Integer, primary_key=True, index=True)
-    device_id = Column(String, ForeignKey("scanner_devices.id"), nullable=False)
+    device_id = Column(String, ForeignKey("scanner_devices.id"), index=True, nullable=False)
     wifi_count = Column(Integer, nullable=False)
     bt_count = Column(Integer, nullable=False)
     count = Column(Float, nullable=True)  # 계산된 점수

@@ -109,7 +109,7 @@ app.include_router(api_router, prefix=settings.API_V1_STR)
 
 @app.get("/")
 def root():
-    return {"하이염"}
+    return {"message": "하이염"}
 
 if __name__ == "__main__":
     import uvicorn
