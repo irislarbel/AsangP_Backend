@@ -1,7 +1,11 @@
 from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Float
 from sqlalchemy.orm import relationship
-from datetime import datetime
+from datetime import datetime, timedelta, timezone
 from app.core.database import Base
+
+def get_kst_now():
+    """한국 표준시(KST)를 반환합니다."""
+    return datetime.now(timezone(timedelta(hours=9))).replace(tzinfo=None)
 
 class Space(Base):
     __tablename__ = "spaces"
@@ -23,7 +27,7 @@ class ScannerDevice(Base):
     id = Column(String, primary_key=True, index=True)
     space_id = Column(Integer, ForeignKey("spaces.id"))
     location_description = Column(String, nullable=True)
-    last_seen = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
+    last_seen = Column(DateTime, default=get_kst_now, onupdate=get_kst_now)
 
     # Relationships
     space = relationship("Space", back_populates="devices")
@@ -37,7 +41,7 @@ class CongestionData(Base):
     device_id = Column(String, ForeignKey("scanner_devices.id"), nullable=False)
     count = Column(Float, default=0.0)
     result = Column(String, nullable=False)
-    timestamp = Column(DateTime, default=datetime.utcnow)
+    timestamp = Column(DateTime, default=get_kst_now)
 
     # Relationship
     device = relationship("ScannerDevice", back_populates="congestion_history")
