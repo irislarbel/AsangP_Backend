@@ -11,16 +11,16 @@ class Space(Base):
     description = Column(String, nullable=True)
     
     # 혼잡도 판정 기준값
-    low_threshold = Column(Float, default=10.0)    # 이 값 이하면 '여유'
-    medium_threshold = Column(Float, default=30.0) # 이 값 이하면 '보통', 초과면 '혼잡'
+    low_threshold = Column(Float, default=10.0)
+    medium_threshold = Column(Float, default=30.0)
 
-    # Relationship: 1 Space can have many Devices
+    # Relationship
     devices = relationship("ScannerDevice", back_populates="space")
 
 class ScannerDevice(Base):
     __tablename__ = "scanner_devices"
 
-    id = Column(String, primary_key=True, index=True) # Device MAC or custom ID
+    id = Column(String, primary_key=True, index=True)
     space_id = Column(Integer, ForeignKey("spaces.id"))
     location_description = Column(String, nullable=True)
     last_seen = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow)
@@ -28,15 +28,30 @@ class ScannerDevice(Base):
     # Relationships
     space = relationship("Space", back_populates="devices")
     congestion_history = relationship("CongestionData", back_populates="device")
+    raw_logs = relationship("RawScannerData", back_populates="device")
 
 class CongestionData(Base):
     __tablename__ = "congestion_data"
 
     id = Column(Integer, primary_key=True, index=True)
-    device_id = Column(String, ForeignKey("scanner_devices.id"))
+    device_id = Column(String, ForeignKey("scanner_devices.id"), nullable=False)
     count = Column(Float, default=0.0)
-    result = Column(String, nullable=False) # "여유", "보통", "혼잡"
+    result = Column(String, nullable=False)
     timestamp = Column(DateTime, default=datetime.utcnow)
 
     # Relationship
     device = relationship("ScannerDevice", back_populates="congestion_history")
+
+class RawScannerData(Base):
+    """센서로부터 받은 원본 데이터를 기록하는 로그 테이블"""
+    __tablename__ = "raw_scanner_data"
+
+    id = Column(Integer, primary_key=True, index=True)
+    device_id = Column(String, ForeignKey("scanner_devices.id"), nullable=False)
+    wifi_count = Column(Integer, nullable=False)
+    bt_count = Column(Integer, nullable=False)
+    timestamp = Column(DateTime, default=get_kst_now)
+
+
+    # Relationship
+    device = relationship("ScannerDevice", back_populates="raw_logs")

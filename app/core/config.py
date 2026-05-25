@@ -14,6 +14,9 @@ class Settings(BaseSettings):
     
     # 보안 설정
     SENSOR_API_KEY: str
+    ADMIN_USERNAME: str
+    ADMIN_PASSWORD: str
+    SECRET_KEY: str
     
     # CORS
     BACKEND_CORS_ORIGINS: List[str] = [

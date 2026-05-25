@@ -13,16 +13,23 @@ class CongestionService:
 
     def record_congestion(self, data_in: CongestionDataCreate):
         """
-        ESP32로부터 데이터를 받아 가공하고, 공간별 기준에 따라 혼잡도를 판정하여 저장합니다.
+        ESP32로부터 데이터를 받아 가공하고, 판정 결과를 저장하며 원본 로그를 남깁니다.
         """
         device = self.device_repository.get_by_id(data_in.device_id)
         if not device:
             raise HTTPException(status_code=404, detail=f"Device {data_in.device_id} not registered")
         
-        # 1. 점수 계산 (WiFi + BT * 0.5)
+        # 1. 원본 로그 기록
+        self.repository.create_raw_log(
+            device_id=data_in.device_id,
+            wifi_count=data_in.wifi_count,
+            bt_count=data_in.bt_count
+        )
+
+        # 2. 점수 계산 (WiFi + BT * 0.5)
         calculated_count = data_in.wifi_count + (data_in.bt_count * 0.5)
         
-        # 2. 혼잡도 판정 (공간별 임계값 기준)
+        # 3. 혼잡도 판정
         space = device.space
         if calculated_count <= space.low_threshold:
             result = "여유"
@@ -32,11 +39,17 @@ class CongestionService:
             result = "혼잡"
         
         self.device_repository.update_last_seen(data_in.device_id)
-        return self.repository.create(
+        result_data = self.repository.create(
             device_id=data_in.device_id, 
             count=calculated_count, 
             result=result
         )
+        
+        # 원자성 보장을 위해 서비스 레이어에서 최종 commit
+        self.db.commit()
+        self.db.refresh(result_data)
+        
+        return result_data
 
     def get_space_current_status(self, space_id: int):
         """특정 공간의 현재 혼잡도 상태와 판정 결과를 반환합니다."""
