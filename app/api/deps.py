@@ -25,7 +25,7 @@ def validate_api_key(api_key: str = Security(api_key_header)):
     if not api_key:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="API Key가 누락되었습니다."
+            detail="API키를가져오는거시와요"
         )
     
     # 타이밍 공격 방지를 위한 안전한 비교
@@ -34,6 +34,6 @@ def validate_api_key(api_key: str = Security(api_key_header)):
     if not is_valid:
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
-            detail="유효하지 않은 API Key입니다."
+            detail="틀린거시와요"
         )
     return api_key

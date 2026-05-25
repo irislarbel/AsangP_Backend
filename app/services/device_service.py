@@ -18,7 +18,7 @@ class DeviceService:
         if not device:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Device with id {device_id} not found"
+                detail=f"{device_id}번장치같은건업는거시와요"
             )
         return device
 
@@ -27,14 +27,14 @@ class DeviceService:
         if not self.space_repository.get_by_id(device_in.space_id):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Space with id {device_in.space_id} does not exist"
+                detail=f"{device_in.space_id}번자리같은건업는거시와요"
             )
         
         # 이미 존재하는 기기인지 확인
         if self.repository.get_by_id(device_in.id):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"Device with id {device_in.id} already registered"
+                detail=f"{device_in.id}번장치는이미등록된거시와요"
             )
             
         device = self.repository.create(device_in)
@@ -47,7 +47,7 @@ class DeviceService:
         if not device:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail=f"Device with id {device_id} not found"
+                detail=f"{device_id}번도..업는거시다"
             )
         self.db.commit()
         self.db.refresh(device)
