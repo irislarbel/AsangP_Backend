@@ -40,7 +40,7 @@ class SpaceService:
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="저는아마네스즈하가아닙니다"
                 )
-            # 너무 오래된 과거 데이터 차단 (예: 2024년 이전)
+            # 너무 오래된 과거 데이터 차단
             if target_date < date(2026, 5, 10):
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
@@ -49,8 +49,12 @@ class SpaceService:
         
         # 기준 시점 결정
         if target_date:
-            # 특정 날짜가 지정된 경우 해당 날짜의 06:00부터 시작
-            start_dt = datetime.combine(target_date, datetime.min.time()).replace(hour=6)
+            if target_date == today_date and now.hour < 6:
+                # 오늘 날짜를 요청했지만 아직 06시 이전인 경우 전날 06시 주기로 처리
+                start_dt = (datetime.combine(target_date, datetime.min.time()) - timedelta(days=1)).replace(hour=6)
+            else:
+                # 특정 날짜가 지정된 경우 해당 날짜의 06:00부터 시작
+                start_dt = datetime.combine(target_date, datetime.min.time()).replace(hour=6)
         else:
             # 지정되지 않은 경우 '오늘'의 06:00 (현재가 06시 이전이면 어제 06시부터)
             if now.hour < 6:
@@ -76,6 +80,10 @@ class SpaceService:
             """데이터를 10분 단위로 그룹화하여 평균을 냅니다."""
             buckets = {}
             for log in raw_data:
+                # count가 None인 경우 계산에서 제외 (방어적 코드)
+                if log.count is None:
+                    continue
+                
                 minute_bucket = (log.timestamp.minute // 10) * 10
                 key = (log.timestamp.date(), log.timestamp.hour, minute_bucket)
                 if key not in buckets: buckets[key] = []

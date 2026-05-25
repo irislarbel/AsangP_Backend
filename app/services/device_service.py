@@ -27,7 +27,7 @@ class DeviceService:
         if not self.space_repository.get_by_id(device_in.space_id):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail=f"{device_in.space_id}번장치같은건업는거시와요"
+                detail=f"{device_in.space_id}번자리같은건업는거시와요"
             )
         
         # 이미 존재하는 기기인지 확인
