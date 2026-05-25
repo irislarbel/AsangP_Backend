@@ -1,6 +1,7 @@
+from datetime import datetime
 from sqlalchemy.orm import Session
 from sqlalchemy.dialects.sqlite import insert
-from app.models.models import CongestionData, RawScannerData, get_kst_now
+from app.models.models import CongestionData, RawScannerData, ScannerDevice, get_kst_now
 
 class CongestionRepository:
     def __init__(self, db: Session):
@@ -55,4 +56,14 @@ class CongestionRepository:
             .filter(CongestionData.device_id == device_id)\
             .order_by(CongestionData.timestamp.desc())\
             .limit(limit)\
+            .all()
+
+    def get_raw_history_by_space(self, space_id: int, start_time: datetime, end_time: datetime):
+        """특정 공간의 모든 디바이스에서 발생한 로그를 특정 기간 동안 가져옵니다."""
+        return self.db.query(RawScannerData)\
+            .join(ScannerDevice)\
+            .filter(ScannerDevice.space_id == space_id)\
+            .filter(RawScannerData.timestamp >= start_time)\
+            .filter(RawScannerData.timestamp <= end_time)\
+            .order_by(RawScannerData.timestamp.asc())\
             .all()

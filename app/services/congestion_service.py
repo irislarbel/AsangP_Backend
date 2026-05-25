@@ -18,7 +18,7 @@ class CongestionService:
         """
         device = self.device_repository.get_by_id(data_in.device_id)
         if not device:
-            raise HTTPException(status_code=404, detail=f"Device {data_in.device_id} not registered")
+            raise HTTPException(status_code=404, detail=f"{data_in.device_id}번 장치는 등록되지 않았어요~")
         
         # 1. 점수 계산 (WiFi + BT * 0.5) - 한 번만 수행
         calculated_count = data_in.wifi_count + (data_in.bt_count * 0.5)
@@ -58,9 +58,24 @@ class CongestionService:
 
     def get_space_current_status(self, space_id: int):
         """특정 공간의 현재 혼잡도 상태와 판정 결과를 반환합니다."""
+        # 1. 공간 존재 여부 확인
+        from app.repositories.space_repository import SpaceRepository
+        space_repo = SpaceRepository(self.db)
+        space = space_repo.get_by_id(space_id)
+        if not space:
+            raise HTTPException(status_code=404, detail=f"{space_id}번 장소도 없어요~")
+
+        # 2. 해당 공간의 장치 확인
         devices = self.db.query(ScannerDevice).filter(ScannerDevice.space_id == space_id).all()
         if not devices:
-            raise HTTPException(status_code=404, detail="No devices in this space")
+            # 공간은 있지만 연결된 장치가 없는 경우
+            return {
+                "space_id": space_id,
+                "space_name": space.name,
+                "count": 0.0,
+                "result": "장치 없음",
+                "last_update": None
+            }
 
         # 첫 번째 장치의 최신 데이터를 가져옵니다.
         device = devices[0]
@@ -77,7 +92,7 @@ class CongestionService:
 
         return {
             "space_id": space_id,
-            "space_name": device.space.name,
+            "space_name": space.name,
             "count": count,
             "result": result,
             "last_update": last_update
