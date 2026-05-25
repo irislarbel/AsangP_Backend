@@ -1,16 +1,16 @@
 from sqlalchemy.orm import Session
 from app.models.models import CongestionData
-from app.api.schemas.congestion import CongestionDataCreate
 
 class CongestionRepository:
     def __init__(self, db: Session):
         self.db = db
 
-    def create(self, data_in: CongestionDataCreate):
+    def create(self, device_id: str, count: float, result: str):
+        """계산된 count와 판정 결과(result)를 함께 저장합니다."""
         db_data = CongestionData(
-            device_id=data_in.device_id,
-            wifi_count=data_in.wifi_count,
-            bt_count=data_in.bt_count
+            device_id=device_id,
+            count=count,
+            result=result
         )
         self.db.add(db_data)
         self.db.commit()

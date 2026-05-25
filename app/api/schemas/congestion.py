@@ -1,15 +1,15 @@
 from pydantic import BaseModel, ConfigDict
 from datetime import datetime
 
-class CongestionDataBase(BaseModel):
+class CongestionDataCreate(BaseModel):
     device_id: str
     wifi_count: int
     bt_count: int
 
-class CongestionDataCreate(CongestionDataBase):
-    pass
-
-class CongestionData(CongestionDataBase):
+class CongestionData(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: int
+    device_id: str
+    count: float
+    result: str
     timestamp: datetime

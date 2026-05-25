@@ -1,0 +1,16 @@
+services:
+  backend:
+    build: .
+    container_name: asangp-backend
+    restart: always
+    env_file: .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./asangp.db:/app/asangp.db
+    networks:
+      - asangp-network
+
+networks:
+  asangp-network:
+    driver: bridge

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, Integer, String, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, DateTime, ForeignKey, Float
 from sqlalchemy.orm import relationship
 from datetime import datetime
 from app.core.database import Base
@@ -9,6 +9,10 @@ class Space(Base):
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
     description = Column(String, nullable=True)
+    
+    # 혼잡도 판정 기준값
+    low_threshold = Column(Float, default=10.0)    # 이 값 이하면 '여유'
+    medium_threshold = Column(Float, default=30.0) # 이 값 이하면 '보통', 초과면 '혼잡'
 
     # Relationship: 1 Space can have many Devices
     devices = relationship("ScannerDevice", back_populates="space")
@@ -30,8 +34,8 @@ class CongestionData(Base):
 
     id = Column(Integer, primary_key=True, index=True)
     device_id = Column(String, ForeignKey("scanner_devices.id"))
-    wifi_count = Column(Integer, default=0)
-    bt_count = Column(Integer, default=0)
+    count = Column(Float, default=0.0)
+    result = Column(String, nullable=False) # "여유", "보통", "혼잡"
     timestamp = Column(DateTime, default=datetime.utcnow)
 
     # Relationship

@@ -2,37 +2,33 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from app.api.v1.endpoints import api_router
 from app.core.database import engine, Base
+from app.core.config import settings
 import app.models 
 
 # 앱 시작 시 데이터베이스 테이블 생성
 Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
-    title="AsangP Congestion Monitoring API",
+    title=settings.PROJECT_NAME,
     description="ESP32 WiFi/BT 신호를 활용한 혼잡도 모니터링 시스템 백엔드",
-    version="0.1.0"
+    version=settings.VERSION
 )
 
 # CORS 설정
-origins = [
-    "http://localhost:5173",
-    "http://127.0.0.1:5173",
-]
-
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,
+    allow_origins=[str(origin) for origin in settings.BACKEND_CORS_ORIGINS],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
 # API 라우터 등록
-app.include_router(api_router, prefix="/api/v1")
+app.include_router(api_router, prefix=settings.API_V1_STR)
 
 @app.get("/")
 def root():
-    return {"message": "Welcome to AsangP Congestion Monitoring API. Visit /docs for API documentation."}
+    return {"message": f"Welcome to {settings.PROJECT_NAME}. Visit /docs for API documentation."}
 
 if __name__ == "__main__":
     import uvicorn
