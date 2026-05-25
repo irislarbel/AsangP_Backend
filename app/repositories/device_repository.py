@@ -37,4 +37,6 @@ class DeviceRepository:
         db_device = self.get_by_id(device_id)
         if db_device:
             db_device.last_seen = get_kst_now()
+            self.db.commit()
+            self.db.refresh(db_device)
         return db_device
