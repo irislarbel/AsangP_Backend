@@ -2,12 +2,16 @@ services:
   backend:
     build: .
     container_name: asangp-backend
-    restart: always
+    restart: unless-stopped
     env_file: .env
     ports:
-      - "8000:8000"
+      - "127.0.0.1:8000:8000" # 서버 내부(Nginx)에서만 접근 가능하도록 제한
     volumes:
-      - ./asangp.db:/app/asangp.db
+      - ./asangp.db:/app/asangp.db # DB 파일은 서버에 저장하여 데이터 보존
+    deploy:
+      resources:
+        limits:
+          memory: 512M
     networks:
       - asangp-network
 

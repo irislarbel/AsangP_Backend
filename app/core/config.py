@@ -18,11 +18,8 @@ class Settings(BaseSettings):
     ADMIN_PASSWORD: str
     SECRET_KEY: str
     
-    # CORS
-    BACKEND_CORS_ORIGINS: List[str] = [
-        "http://localhost:5173",
-        "http://127.0.0.1:5173",
-    ]
+    # CORS: .env에서 JSON 리스트 형식으로 작성해야 함
+    BACKEND_CORS_ORIGINS: List[str] = []
 
     # 데이터베이스
     DATABASE_URL: str

@@ -55,7 +55,12 @@ app = FastAPI(
 )
 
 # Session Middleware (Required for sqladmin authentication)
-app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
+app.add_middleware(
+    SessionMiddleware, 
+    secret_key=settings.SECRET_KEY,
+    https_only=True,
+    same_site="lax"
+)
 
 # --- Admin 설정 ---
 admin = Admin(app, engine, title="AsangP 관리자 페이지", authentication_backend=authentication_backend)
