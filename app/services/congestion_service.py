@@ -45,7 +45,7 @@ class CongestionService:
         self.device_repository.update_last_seen(data_in.device_id)
 
         # 5. 현재 혼잡도 상태 업데이트 (덮어쓰기)
-        result_data = self.repository.upsert(
+        self.repository.upsert(
             device_id=data_in.device_id, 
             count=calculated_count, 
             result=result
@@ -53,9 +53,8 @@ class CongestionService:
         
         # 최종 commit
         self.db.commit()
-        self.db.refresh(result_data)
         
-        return result_data
+        return
 
     def get_space_current_status(self, space_id: int):
         """특정 공간의 현재 혼잡도 상태와 판정 결과를 반환합니다."""

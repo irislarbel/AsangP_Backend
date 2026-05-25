@@ -78,7 +78,15 @@ class CongestionAdmin(ModelView, model=CongestionData):
 
 class RawLogAdmin(ModelView, model=RawScannerData):
     name = "ScannerRawLog"
-    column_list = (RawScannerData.id, RawScannerData.device_id, RawScannerData.wifi_count, RawScannerData.bt_count, RawScannerData.timestamp)
+    column_list = (
+        RawScannerData.id, 
+        RawScannerData.device_id, 
+        RawScannerData.wifi_count, 
+        RawScannerData.bt_count, 
+        RawScannerData.count, 
+        RawScannerData.result, 
+        RawScannerData.timestamp
+    )
     icon = "fa-solid fa-list-ul"
 
 admin.add_view(SpaceAdmin)
@@ -101,7 +109,7 @@ app.include_router(api_router, prefix=settings.API_V1_STR)
 
 @app.get("/")
 def root():
-    return {"message": f"Welcome to {settings.PROJECT_NAME}. Visit /docs for API, /admin for Admin UI."}
+    return {"하이염"}
 
 if __name__ == "__main__":
     import uvicorn
