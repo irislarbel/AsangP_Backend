@@ -40,6 +40,7 @@
 - [x] 데이터 가공 및 자동 판정 로직 구현
 - [x] Docker 배포 환경 설정 (`Dockerfile`, `docker-compose.yml`)
 - [x] 초기 데이터 시딩 스크립트(`seed.py`) 최신화
+- [x] 웹 관리자 페이지(`sqladmin`) 및 원본 로그 시스템 구축
 - [ ] HTTPS (SSL/TLS) 적용 및 리버스 프록시 설정
 - [ ] ESP32 클라이언트 연동 코드 작성
 

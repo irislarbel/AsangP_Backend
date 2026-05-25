@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from app.models.models import CongestionData
+from app.models.models import CongestionData, RawScannerData
 
 class CongestionRepository:
     def __init__(self, db: Session):
@@ -16,6 +16,17 @@ class CongestionRepository:
         self.db.commit()
         self.db.refresh(db_data)
         return db_data
+
+    def create_raw_log(self, device_id: str, wifi_count: int, bt_count: int):
+        """원본 측정 데이터를 로그로 남깁니다."""
+        raw_log = RawScannerData(
+            device_id=device_id,
+            wifi_count=wifi_count,
+            bt_count=bt_count
+        )
+        self.db.add(raw_log)
+        self.db.commit()
+        return raw_log
 
     def get_latest_by_device(self, device_id: str):
         return self.db.query(CongestionData)\
