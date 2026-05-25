@@ -55,6 +55,7 @@ app = FastAPI(
     docs_url="/docs" if settings.SHOW_DOCS else None,
     redoc_url="/redoc" if settings.SHOW_DOCS else None,
     openapi_url="/openapi.json" if settings.SHOW_DOCS else None,
+    root_path="/asangp",
 )
 
 # Session Middleware (Required for sqladmin authentication)

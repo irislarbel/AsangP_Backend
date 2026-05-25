@@ -44,6 +44,7 @@
 - [x] 배포용 환경 설정 전환 및 CORS 환경 변수 이관 완료
 - [x] 서버 Nginx 설치 및 리버스 프록시 설정 (Cloudflare Origin CA 적용)
 - [x] 도메인 연결 및 HTTPS (SSL/TLS) 인증서 적용 완료
+- [x] API 및 서비스 전체 경로 접두사 적용 (`/asangp` 추가)
 - [ ] ESP32 클라이언트 연동 코드 작성
 
 ---
