@@ -4,6 +4,10 @@ on:
   push:
     branches: [ main ]
 
+# 최신 Node.js 환경 사용을 강제하여 경고를 제거합니다.
+env:
+  FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
+
 jobs:
   deploy:
     runs-on: ubuntu-latest

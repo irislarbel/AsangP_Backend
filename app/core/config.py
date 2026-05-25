@@ -17,6 +17,7 @@ class Settings(BaseSettings):
     ADMIN_USERNAME: str
     ADMIN_PASSWORD: str
     SECRET_KEY: str
+    SHOW_DOCS: bool = False # 운영 환경에서는 기본적으로 숨김
     
     # CORS: .env에서 JSON 리스트 형식으로 작성해야 함
     BACKEND_CORS_ORIGINS: List[str] = []

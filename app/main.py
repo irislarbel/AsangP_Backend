@@ -51,7 +51,10 @@ authentication_backend = AdminAuth(secret_key=settings.SECRET_KEY)
 app = FastAPI(
     title=settings.PROJECT_NAME,
     description="ESP32 WiFi/BT 신호를 활용한 혼잡도 모니터링 시스템 백엔드",
-    version=settings.VERSION
+    version=settings.VERSION,
+    docs_url="/docs" if settings.SHOW_DOCS else None,
+    redoc_url="/redoc" if settings.SHOW_DOCS else None,
+    openapi_url="/openapi.json" if settings.SHOW_DOCS else None,
 )
 
 # Session Middleware (Required for sqladmin authentication)
