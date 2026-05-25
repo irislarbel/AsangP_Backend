@@ -1,7 +1,6 @@
 from sqlalchemy.orm import Session
-from app.models.models import ScannerDevice
+from app.models.models import ScannerDevice, get_kst_now
 from app.api.schemas.device import ScannerDeviceCreate, ScannerDeviceUpdate
-from datetime import datetime
 
 class DeviceRepository:
     def __init__(self, db: Session):
@@ -37,5 +36,7 @@ class DeviceRepository:
     def update_last_seen(self, device_id: str):
         db_device = self.get_by_id(device_id)
         if db_device:
-            db_device.last_seen = datetime.utcnow()
+            db_device.last_seen = get_kst_now()
+            self.db.commit()
+            self.db.refresh(db_device)
         return db_device
