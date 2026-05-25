@@ -34,7 +34,7 @@ class CongestionData(Base):
     __tablename__ = "congestion_data"
 
     id = Column(Integer, primary_key=True, index=True)
-    device_id = Column(String, ForeignKey("scanner_devices.id"))
+    device_id = Column(String, ForeignKey("scanner_devices.id"), nullable=False)
     count = Column(Float, default=0.0)
     result = Column(String, nullable=False)
     timestamp = Column(DateTime, default=datetime.utcnow)
@@ -47,10 +47,11 @@ class RawScannerData(Base):
     __tablename__ = "raw_scanner_data"
 
     id = Column(Integer, primary_key=True, index=True)
-    device_id = Column(String, ForeignKey("scanner_devices.id"))
-    wifi_count = Column(Integer)
-    bt_count = Column(Integer)
-    timestamp = Column(DateTime, default=datetime.utcnow)
+    device_id = Column(String, ForeignKey("scanner_devices.id"), nullable=False)
+    wifi_count = Column(Integer, nullable=False)
+    bt_count = Column(Integer, nullable=False)
+    timestamp = Column(DateTime, default=get_kst_now)
+
 
     # Relationship
     device = relationship("ScannerDevice", back_populates="raw_logs")

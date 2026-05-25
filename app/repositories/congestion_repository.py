@@ -13,8 +13,6 @@ class CongestionRepository:
             result=result
         )
         self.db.add(db_data)
-        self.db.commit()
-        self.db.refresh(db_data)
         return db_data
 
     def create_raw_log(self, device_id: str, wifi_count: int, bt_count: int):
@@ -25,7 +23,6 @@ class CongestionRepository:
             bt_count=bt_count
         )
         self.db.add(raw_log)
-        self.db.commit()
         return raw_log
 
     def get_latest_by_device(self, device_id: str):

@@ -39,11 +39,17 @@ class CongestionService:
             result = "혼잡"
         
         self.device_repository.update_last_seen(data_in.device_id)
-        return self.repository.create(
+        result_data = self.repository.create(
             device_id=data_in.device_id, 
             count=calculated_count, 
             result=result
         )
+        
+        # 원자성 보장을 위해 서비스 레이어에서 최종 commit
+        self.db.commit()
+        self.db.refresh(result_data)
+        
+        return result_data
 
     def get_space_current_status(self, space_id: int):
         """특정 공간의 현재 혼잡도 상태와 판정 결과를 반환합니다."""

@@ -1,6 +1,10 @@
+import secrets
+import hashlib
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from starlette.middleware.sessions import SessionMiddleware
 from sqladmin import Admin, ModelView
+
 from sqladmin.authentication import AuthenticationBackend
 from starlette.responses import RedirectResponse
 
@@ -19,8 +23,16 @@ class AdminAuth(AuthenticationBackend):
         form = await request.form()
         username, password = form.get("username"), form.get("password")
 
-        if username == settings.ADMIN_USERNAME and password == settings.ADMIN_PASSWORD:
-            request.session.update({"token": "authenticated"})
+        # secrets.compare_digest를 사용하여 타이밍 공격 방지
+        is_valid_username = secrets.compare_digest(str(username), settings.ADMIN_USERNAME)
+        
+        # 입력받은 비밀번호를 해시화 (SHA-256)하여 환경 변수에 저장된 해시값과 비교
+        password_hash = hashlib.sha256(str(password).encode()).hexdigest()
+        is_valid_password = secrets.compare_digest(password_hash, settings.ADMIN_PASSWORD)
+
+        if is_valid_username and is_valid_password:
+            # 관리자 식별 정보를 세션에 저장 (보안 강화)
+            request.session.update({"admin_user": settings.ADMIN_USERNAME})
             return True
         return False
 
@@ -29,10 +41,9 @@ class AdminAuth(AuthenticationBackend):
         return True
 
     async def authenticate(self, request: Request) -> bool:
-        token = request.session.get("token")
-        if not token:
-            return False
-        return True
+        admin_user = request.session.get("admin_user")
+        # 저장된 관리자 아이디가 설정된 관리자 아이디와 정확히 일치하는지 확인
+        return admin_user == settings.ADMIN_USERNAME
 
 authentication_backend = AdminAuth(secret_key=settings.SECRET_KEY)
 # ----------------------
@@ -43,28 +54,31 @@ app = FastAPI(
     version=settings.VERSION
 )
 
+# Session Middleware (Required for sqladmin authentication)
+app.add_middleware(SessionMiddleware, secret_key=settings.SECRET_KEY)
+
 # --- Admin 설정 ---
 admin = Admin(app, engine, title="AsangP 관리자 페이지", authentication_backend=authentication_backend)
 
 class SpaceAdmin(ModelView, model=Space):
     name = "SpaceList"
-    column_list = [Space.id, Space.name, Space.low_threshold, Space.medium_threshold]
-    form_columns = [Space.name, Space.description, Space.low_threshold, Space.medium_threshold]
+    column_list = (Space.id, Space.name, Space.low_threshold, Space.medium_threshold)
+    form_columns = (Space.name, Space.description, Space.low_threshold, Space.medium_threshold)
     icon = "fa-solid fa-map-location-dot"
 
 class DeviceAdmin(ModelView, model=ScannerDevice):
     name = "DeviceList"
-    column_list = [ScannerDevice.id, ScannerDevice.space_id, ScannerDevice.last_seen]
+    column_list = (ScannerDevice.id, ScannerDevice.space_id, ScannerDevice.last_seen)
     icon = "fa-solid fa-microchip"
 
 class CongestionAdmin(ModelView, model=CongestionData):
     name = "CongestionData"
-    column_list = [CongestionData.id, CongestionData.device_id, CongestionData.count, CongestionData.result, CongestionData.timestamp]
+    column_list = (CongestionData.id, CongestionData.device_id, CongestionData.count, CongestionData.result, CongestionData.timestamp)
     icon = "fa-solid fa-chart-line"
 
 class RawLogAdmin(ModelView, model=RawScannerData):
     name = "ScannerRawLog"
-    column_list = [RawScannerData.id, RawScannerData.device_id, RawScannerData.wifi_count, RawScannerData.bt_count, RawScannerData.timestamp]
+    column_list = (RawScannerData.id, RawScannerData.device_id, RawScannerData.wifi_count, RawScannerData.bt_count, RawScannerData.timestamp)
     icon = "fa-solid fa-list-ul"
 
 admin.add_view(SpaceAdmin)
