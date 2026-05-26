@@ -5,7 +5,7 @@
 - **목적**: ESP32로부터 수집된 WiFi 및 Bluetooth 신호 데이터를 분석하여 특정 장소의 혼잡도를 측정하고 제공하는 API 서버.
 - **주요 기능**:
     - API Key 인증 기반의 센서 데이터 수집 (타이밍 공격 방어 적용)
-    - 공간별 임계값(Threshold) 기반 혼잡도 자동 판정 (여유/보통/혼잡)
+    - 공간별 최대 수용 인원(max_capacity) 대비 백분율 기반 혼잡도 산출 (0~100%)
     - WiFi/BT 신호 가중치 적용 산출 공식 (WiFi + BT * 0.5)
     - 실시간 혼잡도 조회 및 이력 관리
 
@@ -20,9 +20,8 @@
 ## 3. 핵심 로직: 혼잡도 산출 및 판정
 - **산출 공식**: `count = wifi_count + (bt_count * 0.5)`
 - **판정 기준**:
-    - `count <= low_threshold`: **여유**
-    - `low_threshold < count <= medium_threshold`: **보통**
-    - `count > medium_threshold`: **혼잡**
+    - `congestion_level = min(100, round((count / max_capacity) * 100))`
+    - 정수 백분율로 반환하며 100%를 초과하지 않음.
 
 ## 4. 보안 및 배포 설정 (Security & Deployment)
 - **CORS**: `BACKEND_CORS_ORIGINS` 환경 변수로 관리 (배포 시 프론트 도메인 추가 필수)

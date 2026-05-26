@@ -71,8 +71,8 @@ admin = Admin(app, engine, title="AsangP 관리자 페이지", authentication_ba
 
 class SpaceAdmin(ModelView, model=Space):
     name = "SpaceList"
-    column_list = (Space.id, Space.name, Space.low_threshold, Space.medium_threshold)
-    form_columns = (Space.name, Space.description, Space.low_threshold, Space.medium_threshold)
+    column_list = (Space.id, Space.name, Space.max_capacity)
+    form_columns = (Space.name, Space.description, Space.max_capacity)
     icon = "fa-solid fa-map-location-dot"
 
 class DeviceAdmin(ModelView, model=ScannerDevice):
@@ -82,7 +82,7 @@ class DeviceAdmin(ModelView, model=ScannerDevice):
 
 class CongestionAdmin(ModelView, model=CongestionData):
     name = "CongestionData"
-    column_list = (CongestionData.id, CongestionData.device_id, CongestionData.count, CongestionData.result, CongestionData.timestamp)
+    column_list = (CongestionData.id, CongestionData.device_id, CongestionData.count, CongestionData.congestion_level, CongestionData.timestamp)
     icon = "fa-solid fa-chart-line"
 
 class RawLogAdmin(ModelView, model=RawScannerData):
@@ -93,7 +93,7 @@ class RawLogAdmin(ModelView, model=RawScannerData):
         RawScannerData.wifi_count, 
         RawScannerData.bt_count, 
         RawScannerData.count, 
-        RawScannerData.result, 
+        RawScannerData.congestion_level, 
         RawScannerData.timestamp
     )
     icon = "fa-solid fa-list-ul"
