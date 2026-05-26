@@ -10,6 +10,5 @@ class CongestionData(BaseModel):
     model_config = ConfigDict(from_attributes=True)
     id: int
     device_id: str
-    count: float
-    result: str
+    congestion_level: int
     timestamp: datetime

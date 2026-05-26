@@ -80,14 +80,14 @@ class SpaceService:
             """데이터를 10분 단위로 그룹화하여 평균을 냅니다."""
             buckets = {}
             for log in raw_data:
-                # count가 None인 경우 계산에서 제외 (방어적 코드)
-                if log.count is None:
+                # congestion_level이 None인 경우 계산에서 제외
+                if log.congestion_level is None:
                     continue
                 
                 minute_bucket = (log.timestamp.minute // 10) * 10
                 key = (log.timestamp.date(), log.timestamp.hour, minute_bucket)
                 if key not in buckets: buckets[key] = []
-                buckets[key].append(log.count)
+                buckets[key].append(log.congestion_level)
 
             result = []
             current_slot = base_start
@@ -98,8 +98,8 @@ class SpaceService:
                 key = (current_slot.date(), current_slot.hour, current_slot.minute)
                 time_str = f"{current_slot.hour:02d}:{current_slot.minute:02d}"
                 
-                avg_count = sum(buckets[key]) / len(buckets[key]) if key in buckets else 0
-                result.append(HistoryPoint(time=time_str, count=round(avg_count, 2)))
+                avg_level = sum(buckets[key]) / len(buckets[key]) if key in buckets else 0
+                result.append(HistoryPoint(time=time_str, congestion_level=round(avg_level)))
                 current_slot += timedelta(minutes=10)
             
             return result
