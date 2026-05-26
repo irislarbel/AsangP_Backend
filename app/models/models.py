@@ -15,7 +15,7 @@ class Space(Base):
     description = Column(String, nullable=True)
     
     # 최대 수용 인원
-    max_capacity = Column(Integer, default=50)
+    max_capacity = Column(Integer, default=50, nullable=False)
 
     # Relationship
     devices = relationship("ScannerDevice", back_populates="space")
@@ -39,7 +39,7 @@ class CongestionData(Base):
     id = Column(Integer, primary_key=True, index=True)
     device_id = Column(String, ForeignKey("scanner_devices.id"), unique=True, index=True, nullable=False)
     count = Column(Float, default=0.0)
-    congestion_level = Column(Integer, default=0) # max_capacity 대비 백분율 (0-100)
+    congestion_level = Column(Integer, default=0, nullable=False) # max_capacity 대비 백분율 (0-100)
     timestamp = Column(DateTime, default=get_kst_now)
 
     # Relationship

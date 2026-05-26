@@ -1,17 +1,17 @@
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 from typing import Optional, List
 
 class SpaceBase(BaseModel):
     name: str
     description: Optional[str] = None
-    max_capacity: int = 50
+    max_capacity: int = Field(default=50, gt=0)
 
 class SpaceCreate(SpaceBase):
     pass
 
 class SpaceUpdate(SpaceBase):
     name: Optional[str] = None
-    max_capacity: Optional[int] = None
+    max_capacity: Optional[int] = Field(default=None, gt=0)
 
 class Space(SpaceBase):
     model_config = ConfigDict(from_attributes=True)

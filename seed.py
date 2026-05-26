@@ -2,8 +2,9 @@ from app.core.database import SessionLocal, engine, Base
 from app.models.models import Space, ScannerDevice, CongestionData, RawScannerData, get_kst_now
 
 def seed_data():
-    # 테이블 생성
-    Base.metadata.drop_all(bind=engine) # 기존 테이블 삭제 후 재생성 (스키마 변경 반영)
+    # 주의: 아래 코드는 모든 기존 데이터를 삭제합니다. 초기 개발 환경에서만 사용하세요.
+    # 운영 환경에서는 Alembic 등을 통한 마이그레이션 권장.
+    Base.metadata.drop_all(bind=engine) 
     Base.metadata.create_all(bind=engine)
     
     db = SessionLocal()

@@ -25,9 +25,8 @@ class CongestionService:
         
         # 2. 혼잡도 판정 (max_capacity 대비 백분율)
         space = device.space
-        if space.max_capacity > 0:
-            congestion_level = round((calculated_count / space.max_capacity) * 100)
-            congestion_level = min(100, congestion_level)
+        if space and space.max_capacity and space.max_capacity > 0:
+            congestion_level = max(0, min(100, round((calculated_count / space.max_capacity) * 100)))
         else:
             congestion_level = 0
 
@@ -75,16 +74,15 @@ class CongestionService:
                 "last_update": None
             }
 
-        # 첫 번째 장치의 최신 데이터를 가져옵니다.
-        device = devices[0]
-        latest = self.repository.get_latest_by_device(device.id)
-        
+        # 해당 공간의 모든 장치로부터 최신 데이터를 수집하여 가장 최근의 것을 선택합니다.
         congestion_level = 0
         last_update = None
         
-        if latest:
-            congestion_level = latest.congestion_level
-            last_update = latest.timestamp
+        for device in devices:
+            latest = self.repository.get_latest_by_device(device.id)
+            if latest and (last_update is None or latest.timestamp > last_update):
+                congestion_level = latest.congestion_level
+                last_update = latest.timestamp
 
         return {
             "space_id": space_id,
