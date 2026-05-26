@@ -10,10 +10,10 @@ def seed_data():
     
     # 1. 공간 생성
     spaces = [
-        Space(name="일신관라운지", description="일신관 1층 라운지", low_threshold=15.0, medium_threshold=40.0),
-        Space(name="성호관라운지", description="성호관 1층 라운지", low_threshold=10.0, medium_threshold=30.0),
-        Space(name="아슐랭", description="학생식당 아슐랭", low_threshold=50.0, medium_threshold=120.0),
-        Space(name="학생회관카페", description="학생회관 1층 카페", low_threshold=20.0, medium_threshold=50.0),
+        Space(name="일신관라운지", description="일신관 1층 라운지", max_capacity=50),
+        Space(name="성호관라운지", description="성호관 1층 라운지", max_capacity=40),
+        Space(name="아슐랭", description="학생식당 아슐랭", max_capacity=150),
+        Space(name="학생회관카페", description="학생회관 1층 카페", max_capacity=60),
     ]
 
     for space in spaces:
@@ -39,10 +39,13 @@ def seed_data():
         # 가상의 데이터 (WiFi 20, BT 10 -> count: 25.0)
         wifi, bt = 20, 10
         count = wifi + (bt * 0.5)
-        result = "보통" # 임계값에 따라 다르지만 예시로 설정
+        
+        # 공간의 max_capacity를 찾아서 백분율 계산
+        space = next(s for s in spaces if s.id == device.space_id)
+        congestion_level = min(100, round((count / space.max_capacity) * 100))
         
         # 현재 상태 저장
-        db.add(CongestionData(device_id=device.id, count=count, result=result, timestamp=get_kst_now()))
+        db.add(CongestionData(device_id=device.id, count=count, congestion_level=congestion_level, timestamp=get_kst_now()))
         
         # 원본 로그 저장
         db.add(RawScannerData(
@@ -50,7 +53,7 @@ def seed_data():
             wifi_count=wifi, 
             bt_count=bt, 
             count=count, 
-            result=result, 
+            congestion_level=congestion_level, 
             timestamp=get_kst_now()
         ))
 

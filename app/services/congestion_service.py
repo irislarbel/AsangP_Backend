@@ -23,14 +23,13 @@ class CongestionService:
         # 1. 점수 계산 (WiFi + BT * 0.5) - 한 번만 수행
         calculated_count = data_in.wifi_count + (data_in.bt_count * 0.5)
         
-        # 2. 혼잡도 판정
+        # 2. 혼잡도 판정 (max_capacity 대비 백분율)
         space = device.space
-        if calculated_count <= space.low_threshold:
-            result = "여유"
-        elif calculated_count <= space.medium_threshold:
-            result = "보통"
+        if space.max_capacity > 0:
+            congestion_level = round((calculated_count / space.max_capacity) * 100)
+            congestion_level = min(100, congestion_level)
         else:
-            result = "혼잡"
+            congestion_level = 0
 
         # 3. 원본 로그 기록 (계산 결과 포함)
         self.repository.create_raw_log(
@@ -38,7 +37,7 @@ class CongestionService:
             wifi_count=data_in.wifi_count,
             bt_count=data_in.bt_count,
             count=calculated_count,
-            result=result
+            congestion_level=congestion_level
         )
         
         # 4. 장치 마지막 활동 시간 업데이트
@@ -48,7 +47,7 @@ class CongestionService:
         self.repository.upsert(
             device_id=data_in.device_id, 
             count=calculated_count, 
-            result=result
+            congestion_level=congestion_level
         )
         
         # 최종 commit
@@ -72,8 +71,7 @@ class CongestionService:
             return {
                 "space_id": space_id,
                 "space_name": space.name,
-                "count": 0.0,
-                "result": "장치 없음",
+                "congestion_level": 0,
                 "last_update": None
             }
 
@@ -81,19 +79,16 @@ class CongestionService:
         device = devices[0]
         latest = self.repository.get_latest_by_device(device.id)
         
-        count = 0.0
-        result = "데이터 없음"
+        congestion_level = 0
         last_update = None
         
         if latest:
-            count = latest.count
-            result = latest.result
+            congestion_level = latest.congestion_level
             last_update = latest.timestamp
 
         return {
             "space_id": space_id,
             "space_name": space.name,
-            "count": count,
-            "result": result,
+            "congestion_level": congestion_level,
             "last_update": last_update
         }

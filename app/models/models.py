@@ -14,9 +14,8 @@ class Space(Base):
     name = Column(String, nullable=False)
     description = Column(String, nullable=True)
     
-    # 혼잡도 판정 기준값
-    low_threshold = Column(Float, default=10.0)
-    medium_threshold = Column(Float, default=30.0)
+    # 최대 수용 인원
+    max_capacity = Column(Integer, default=50)
 
     # Relationship
     devices = relationship("ScannerDevice", back_populates="space")
@@ -40,7 +39,7 @@ class CongestionData(Base):
     id = Column(Integer, primary_key=True, index=True)
     device_id = Column(String, ForeignKey("scanner_devices.id"), unique=True, index=True, nullable=False)
     count = Column(Float, default=0.0)
-    result = Column(String, nullable=False)
+    congestion_level = Column(Integer, default=0) # max_capacity 대비 백분율 (0-100)
     timestamp = Column(DateTime, default=get_kst_now)
 
     # Relationship
@@ -55,7 +54,7 @@ class RawScannerData(Base):
     wifi_count = Column(Integer, nullable=False)
     bt_count = Column(Integer, nullable=False)
     count = Column(Float, nullable=True)  # 계산된 점수
-    result = Column(String, nullable=True) # 판정 결과
+    congestion_level = Column(Integer, nullable=True) # 판정 결과 (백분율)
     timestamp = Column(DateTime, default=get_kst_now)
 
 
