@@ -45,7 +45,7 @@ jobs:
             # 2. 혹은 현재 DB 구조가 바뀌어서 긴급하게 밀어야 하는 상황일 때 실행
             if [ "${{ github.event.inputs.reset_db }}" == "true" ]; then
               echo "Database reset triggered manually..."
-              docker compose exec -T backend python seed.py
+              docker compose exec -T backend uv run python seed.py
             fi
             
             # [임시] 현재 Internal Server Error 해결을 위해 이번 한 번만 강제 실행되도록 설정하고 싶다면 아래 주석을 해제하세요.
