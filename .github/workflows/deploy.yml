@@ -3,8 +3,15 @@ name: Deploy to Server
 on:
   push:
     branches: [ main ]
+  # 수동 실행 버튼 추가
+  workflow_dispatch:
+    inputs:
+      reset_db:
+        description: '데이터베이스를 초기화(seed.py 실행)할까요?'
+        required: true
+        default: false
+        type: boolean
 
-# 최신 Node.js 환경 사용을 강제하여 경고를 제거합니다.
 env:
   FORCE_JAVASCRIPT_ACTIONS_TO_NODE24: true
 
@@ -27,10 +34,19 @@ jobs:
             cd ${{ secrets.PROJECT_PATH }}
             git pull origin main
             
-            # Environment Secrets에 저장된 DOTENV 내용을 서버의 .env 파일로 덮어씁니다.
             cat <<EOF > .env
             ${{ secrets.DOTENV }}
             EOF
             
             docker compose up -d --build
             docker image prune -f
+            
+            # 1. 수동으로 'reset_db'를 체크하고 실행했거나
+            # 2. 혹은 현재 DB 구조가 바뀌어서 긴급하게 밀어야 하는 상황일 때 실행
+            if [ "${{ github.event.inputs.reset_db }}" == "true" ]; then
+              echo "Database reset triggered manually..."
+              docker compose exec -T backend python seed.py
+            fi
+            
+            # [임시] 현재 Internal Server Error 해결을 위해 이번 한 번만 강제 실행되도록 설정하고 싶다면 아래 주석을 해제하세요.
+            # docker compose exec -T backend python seed.py
