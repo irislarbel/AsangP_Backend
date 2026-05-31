@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from app.core.database import get_db
 from app.services.congestion_service import CongestionService
 from app.services.space_service import SpaceService
-from app.api.schemas.space import SpaceHistoryResponse
+from app.api.schemas.space import SpaceHistoryResponse, SpacePeaksResponse
 
 router = APIRouter()
 
@@ -30,3 +30,17 @@ def get_space_history(
     """
     service = SpaceService(db)
     return service.get_history(space_id, target_date)
+
+@router.get("/{space_id}/peaks", response_model=SpacePeaksResponse)
+def get_space_peaks(
+    space_id: int, 
+    target_date: date, 
+    threshold: int = 70,
+    db: Session = Depends(get_db)
+):
+    """
+    프론트엔드용: 과거 7일간의 혼잡도 피크 데이터 및 추세를 반환합니다.
+    """
+    service = SpaceService(db)
+    return service.get_peaks(space_id, target_date, threshold)
+

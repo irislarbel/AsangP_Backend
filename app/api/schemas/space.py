@@ -24,3 +24,15 @@ class HistoryPoint(BaseModel):
 class SpaceHistoryResponse(BaseModel):
     target: List[HistoryPoint] # 선택한 날짜 (또는 오늘)
     comparison: List[HistoryPoint] # 선택한 날짜의 일주일 전
+
+class PeakDayData(BaseModel):
+    date: str
+    peak_ranges: List[str]
+    max_congestion: Optional[int] = None
+    daily_trend: List[Optional[int]]
+
+class SpacePeaksResponse(BaseModel):
+    space_id: int
+    target_date: str
+    threshold: int
+    data: List[PeakDayData]

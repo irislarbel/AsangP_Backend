@@ -22,6 +22,9 @@
 - **판정 기준**:
     - `congestion_level = min(100, round((count / max_capacity) * 100))`
     - 정수 백분율로 반환하며 100%를 초과하지 않음.
+- **주간 피크 추세 API (KST 고정)**:
+    - 논리적 일자(Logical Day): 06:00 ~ 익일 06:00 (심야 시간대 피크 분절 방지)
+    - 결측치 처리: 센서 로그가 전혀 없는 구간은 차트 구분을 위해 `null`로 응답
 
 ## 4. 보안 및 배포 설정 (Security & Deployment)
 - **CORS**: `BACKEND_CORS_ORIGINS` 환경 변수로 관리 (배포 시 프론트 도메인 추가 필수)
@@ -44,7 +47,8 @@
 - [x] 서버 Nginx 설치 및 리버스 프록시 설정 (Cloudflare Origin CA 적용)
 - [x] 도메인 연결 및 HTTPS (SSL/TLS) 인증서 적용 완료
 - [x] API 및 서비스 전체 경로 접두사 적용 (`/asangp` 추가)
+- [x] 프론트엔드 최적화용 7일간 혼잡도 피크 및 주간 추세 조회 API (`GET /api/v1/spaces/{space_id}/peaks`) 구현
 - [ ] ESP32 클라이언트 연동 코드 작성
 
 ---
-*마지막 업데이트: 2026-05-25 (보안 강화 및 배포 설정 완료)*
+*마지막 업데이트: 2026-05-31 (주간 혼잡도 피크 API 추가 및 KST 논리적 일자 적용)*
