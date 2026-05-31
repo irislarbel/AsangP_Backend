@@ -118,10 +118,29 @@ class SpaceService:
         self.get_space(space_id)
 
         now = datetime.now(timezone(timedelta(hours=9))).replace(tzinfo=None)
+        today_date = now.date()
+
+        # 2. 날짜 범위 유효성 검사 및 06시 이전 요청 조정
+        if target_date > today_date:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="저는아마네스즈하가아닙니다"
+            )
+        if target_date < date(2026, 5, 10):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="너무많이궁금해하시네요~,, 2026-05-10 이전의데이터는없답니다"
+            )
+
+        # 오늘 날짜를 요청했지만 아직 06시 이전인 경우, 논리적으로 아직 전날임
+        if target_date == today_date and now.hour < 6:
+            adjusted_target_date = target_date - timedelta(days=1)
+        else:
+            adjusted_target_date = target_date
         
-        # 2. 날짜 산출 (target_date 6일 전 06:00 ~ target_date 익일 06:00)
-        start_dt = datetime.combine(target_date, datetime.min.time()).replace(hour=6) - timedelta(days=6)
-        end_dt = datetime.combine(target_date, datetime.min.time()).replace(hour=6) + timedelta(days=1)
+        # 3. 날짜 산출 (adjusted_target_date 6일 전 06:00 ~ 익일 06:00)
+        start_dt = datetime.combine(adjusted_target_date, datetime.min.time()).replace(hour=6) - timedelta(days=6)
+        end_dt = datetime.combine(adjusted_target_date, datetime.min.time()).replace(hour=6) + timedelta(days=1)
         
         # 미래 데이터 조회 방지 (현재 시간까지만 실제 조회)
         if end_dt > now:
@@ -129,10 +148,10 @@ class SpaceService:
         else:
             actual_end_dt = end_dt - timedelta(seconds=1)
 
-        # 3. 데이터 조회
+        # 4. 데이터 조회
         raw_data = self.congestion_repository.get_raw_history_by_space(space_id, start_dt, actual_end_dt)
 
-        # 4. 데이터를 1시간 단위로 논리적 일자 버킷에 담기
+        # 5. 데이터를 1시간 단위로 논리적 일자 버킷에 담기
         # day_buckets: { logical_date: { hour_index: [levels] } }
         # hour_index: 0=06:00, 1=07:00, ..., 18=00:00(자정), 23=05:00
         day_buckets = {}
@@ -204,7 +223,7 @@ class SpaceService:
 
         return SpacePeaksResponse(
             space_id=space_id,
-            target_date=target_date.isoformat(),
+            target_date=adjusted_target_date.isoformat(),
             threshold=threshold,
             data=result_data
         )
