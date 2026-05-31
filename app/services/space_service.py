@@ -4,7 +4,7 @@ from sqlalchemy.orm import Session
 from fastapi import HTTPException, status
 from app.repositories.space_repository import SpaceRepository
 from app.repositories.congestion_repository import CongestionRepository
-from app.api.schemas.space import SpaceCreate, SpaceUpdate, SpaceHistoryResponse, HistoryPoint
+from app.api.schemas.space import SpaceCreate, SpaceUpdate, SpaceHistoryResponse, HistoryPoint, SpacePeaksResponse, PeakDayData
 
 class SpaceService:
     def __init__(self, db: Session):
@@ -110,6 +110,103 @@ class SpaceService:
         return SpaceHistoryResponse(
             target=resample_data(target_raw, start_dt, is_target_today),
             comparison=resample_data(comparison_raw, comparison_start, False)
+        )
+
+    def get_peaks(self, space_id: int, target_date: date, threshold: int = 70) -> SpacePeaksResponse:
+        """선택한 날짜를 포함하여 과거 7일간의 혼잡도 피크 데이터(06시 기준 논리적 일자)를 반환합니다."""
+        # 1. 공간 존재 여부 확인
+        self.get_space(space_id)
+
+        now = datetime.now(timezone(timedelta(hours=9))).replace(tzinfo=None)
+        
+        # 2. 날짜 산출 (target_date 6일 전 06:00 ~ target_date 익일 06:00)
+        start_dt = datetime.combine(target_date, datetime.min.time()).replace(hour=6) - timedelta(days=6)
+        end_dt = datetime.combine(target_date, datetime.min.time()).replace(hour=6) + timedelta(days=1)
+        
+        # 미래 데이터 조회 방지 (현재 시간까지만 실제 조회)
+        if end_dt > now:
+            actual_end_dt = now
+        else:
+            actual_end_dt = end_dt - timedelta(seconds=1)
+
+        # 3. 데이터 조회
+        raw_data = self.congestion_repository.get_raw_history_by_space(space_id, start_dt, actual_end_dt)
+
+        # 4. 데이터를 1시간 단위로 논리적 일자 버킷에 담기
+        # day_buckets: { logical_date: { hour_index: [levels] } }
+        # hour_index: 0=06:00, 1=07:00, ..., 18=00:00(자정), 23=05:00
+        day_buckets = {}
+        for i in range(7):
+            logical_date = (start_dt + timedelta(days=i)).date()
+            day_buckets[logical_date] = {h: [] for h in range(24)}
+
+        for log in raw_data:
+            if log.congestion_level is None:
+                continue
+            
+            # logical day 계산: 00:00 ~ 05:59는 논리적으로 전날에 속함
+            log_time = log.timestamp
+            if log_time.hour < 6:
+                logical_date = (log_time - timedelta(days=1)).date()
+                hour_index = log_time.hour + 18 # 0->18, 5->23
+            else:
+                logical_date = log_time.date()
+                hour_index = log_time.hour - 6  # 6->0, 23->17
+            
+            if logical_date in day_buckets:
+                day_buckets[logical_date][hour_index].append(log.congestion_level)
+
+        # 5. 응답 데이터 가공
+        result_data = []
+        for i in range(7):
+            logical_date = (start_dt + timedelta(days=i)).date()
+            buckets = day_buckets.get(logical_date, {h: [] for h in range(24)})
+            
+            daily_trend = []
+            for h in range(24):
+                levels = buckets[h]
+                if not levels:
+                    daily_trend.append(None) # 결측치는 null
+                else:
+                    avg_level = sum(levels) / len(levels)
+                    daily_trend.append(round(avg_level))
+            
+            max_congestion = None
+            valid_trends = [t for t in daily_trend if t is not None]
+            if valid_trends:
+                max_congestion = max(valid_trends)
+
+            # 연속된 피크 구간 찾기
+            peak_ranges = []
+            start_hour_index = -1
+            
+            for h in range(25): # 24까지 돌아서 마지막 구간이 끝나는 것도 처리
+                val = daily_trend[h] if h < 24 else None
+                is_peak = val is not None and val >= threshold
+                
+                if is_peak:
+                    if start_hour_index == -1:
+                        start_hour_index = h
+                else:
+                    if start_hour_index != -1:
+                        end_hour_index = h
+                        start_actual_hour = (start_hour_index + 6) % 24
+                        end_actual_hour = (end_hour_index + 6) % 24
+                        peak_ranges.append(f"{start_actual_hour:02d}:00~{end_actual_hour:02d}:00")
+                        start_hour_index = -1
+
+            result_data.append(PeakDayData(
+                date=logical_date.isoformat(),
+                peak_ranges=peak_ranges,
+                max_congestion=max_congestion,
+                daily_trend=daily_trend
+            ))
+
+        return SpacePeaksResponse(
+            space_id=space_id,
+            target_date=target_date.isoformat(),
+            threshold=threshold,
+            data=result_data
         )
 
     def create_space(self, space_in: SpaceCreate):
