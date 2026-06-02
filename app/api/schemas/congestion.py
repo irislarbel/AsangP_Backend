@@ -12,3 +12,7 @@ class CongestionData(BaseModel):
     device_id: str
     congestion_level: int
     timestamp: datetime
+
+class CongestionResponse(BaseModel):
+    wifi_rssi_threshold: int
+    bt_rssi_threshold: int

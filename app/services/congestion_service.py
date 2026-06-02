@@ -52,7 +52,14 @@ class CongestionService:
         # 최종 commit
         self.db.commit()
         
-        return
+        # Space에 설정된 임계값 반환 (Space가 없으면 기본값 반환)
+        wifi_threshold = space.wifi_rssi_threshold if space else -75
+        bt_threshold = space.bt_rssi_threshold if space else -70
+        
+        return {
+            "wifi_rssi_threshold": wifi_threshold,
+            "bt_rssi_threshold": bt_threshold
+        }
 
     def get_space_current_status(self, space_id: int):
         """특정 공간의 현재 혼잡도 상태와 판정 결과를 반환합니다."""

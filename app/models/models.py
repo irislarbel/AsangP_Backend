@@ -16,6 +16,10 @@ class Space(Base):
     
     # 최대 수용 인원
     max_capacity = Column(Integer, default=50, nullable=False)
+    
+    # RSSI 임계값
+    wifi_rssi_threshold = Column(Integer, default=-75, nullable=False)
+    bt_rssi_threshold = Column(Integer, default=-70, nullable=False)
 
     # Relationship
     devices = relationship("ScannerDevice", back_populates="space")
