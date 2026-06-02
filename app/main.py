@@ -71,8 +71,8 @@ admin = Admin(app, engine, title="AsangP 관리자 페이지", authentication_ba
 
 class SpaceAdmin(ModelView, model=Space):
     name = "SpaceList"
-    column_list = (Space.id, Space.name, Space.max_capacity)
-    form_columns = (Space.name, Space.description, Space.max_capacity)
+    column_list = (Space.id, Space.name, Space.max_capacity, Space.wifi_rssi_threshold, Space.bt_rssi_threshold)
+    form_columns = (Space.name, Space.description, Space.max_capacity, Space.wifi_rssi_threshold, Space.bt_rssi_threshold)
     icon = "fa-solid fa-map-location-dot"
 
 class DeviceAdmin(ModelView, model=ScannerDevice):
