@@ -9,6 +9,10 @@ def get_kst_now():
 
 class Space(Base):
     __tablename__ = "spaces"
+    
+    # 기본 임계값 상수 정의
+    DEFAULT_WIFI_RSSI_THRESHOLD = -75
+    DEFAULT_BT_RSSI_THRESHOLD = -70
 
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String, nullable=False)
@@ -18,9 +22,8 @@ class Space(Base):
     max_capacity = Column(Integer, default=50, nullable=False)
     
     # RSSI 임계값
-    wifi_rssi_threshold = Column(Integer, default=-75, nullable=False)
-    bt_rssi_threshold = Column(Integer, default=-70, nullable=False)
-
+    wifi_rssi_threshold = Column(Integer, default=DEFAULT_WIFI_RSSI_THRESHOLD, nullable=False)
+    bt_rssi_threshold = Column(Integer, default=DEFAULT_BT_RSSI_THRESHOLD, nullable=False)
     # Relationship
     devices = relationship("ScannerDevice", back_populates="space")
 

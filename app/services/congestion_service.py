@@ -52,9 +52,9 @@ class CongestionService:
         # 최종 commit
         self.db.commit()
         
-        # Space에 설정된 임계값 반환 (Space가 없으면 기본값 반환)
-        wifi_threshold = space.wifi_rssi_threshold if space else -75
-        bt_threshold = space.bt_rssi_threshold if space else -70
+        from app.models.models import Space
+        wifi_threshold = space.wifi_rssi_threshold if space and space.wifi_rssi_threshold is not None else Space.DEFAULT_WIFI_RSSI_THRESHOLD
+        bt_threshold = space.bt_rssi_threshold if space and space.bt_rssi_threshold is not None else Space.DEFAULT_BT_RSSI_THRESHOLD
         
         return {
             "wifi_rssi_threshold": wifi_threshold,
