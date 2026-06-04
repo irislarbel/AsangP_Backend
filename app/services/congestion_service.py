@@ -20,8 +20,13 @@ class CongestionService:
         if not device:
             raise HTTPException(status_code=404, detail=f"{data_in.device_id}번 장치는 등록되지 않았어요~")
         
-        # 1. 점수 계산 (WiFi + BT * 0.5) - 한 번만 수행
-        calculated_count = data_in.wifi_count + (data_in.bt_count * 0.5)
+        # 1. 점수 계산 - Wi-Fi 미방출 기기를 고려한 하이브리드 가중치 적용
+        # Wi-Fi가 안 잡히는 경우를 대비해 BT 단독 추정치(0.8)와 가중치 합산(0.7 + 0.3) 중 큰 값을 선택합니다.
+        hybrid_count = max(
+            data_in.bt_count * 0.8,
+            (data_in.wifi_count * 0.7) + (data_in.bt_count * 0.3)
+        )
+        calculated_count = int(round(hybrid_count))
         
         # 2. 혼잡도 판정 (max_capacity 대비 백분율)
         space = device.space

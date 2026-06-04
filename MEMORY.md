@@ -18,7 +18,7 @@
 - **Architecture**: 3-Layer Architecture
 
 ## 3. 핵심 로직: 혼잡도 산출 및 판정
-- **산출 공식**: `count = wifi_count + (bt_count * 0.5)`
+- **산출 공식**: Wi-Fi 미방출 기기를 고려한 하이브리드 가중치 적용 `count = max(bt_count * 0.8, (wifi_count * 0.7) + (bt_count * 0.3))`
 - **판정 기준**:
     - `congestion_level = min(100, round((count / max_capacity) * 100))`
     - 정수 백분율로 반환하며 100%를 초과하지 않음.
@@ -51,4 +51,4 @@
 - [ ] ESP32 클라이언트 연동 코드 작성
 
 ---
-*마지막 업데이트: 2026-05-31 (주간 혼잡도 피크 API 추가 및 KST 논리적 일자 적용)*
+*마지막 업데이트: 2026-06-03 (Wi-Fi 미방출 기기 고려 하이브리드 혼잡도 산출 공식 적용)*
