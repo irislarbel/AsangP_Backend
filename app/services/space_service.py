@@ -41,10 +41,10 @@ class SpaceService:
                     detail="저는아마네스즈하가아닙니다"
                 )
             # 너무 오래된 과거 데이터 차단
-            if target_date < date(2026, 5, 10):
+            if target_date < date(2026, 6, 4):
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="너무많이궁금해하시네요~,, 2026-05-10 이전의데이터는없답니다"
+                    detail="너무많이궁금해하시네요~,, 2026-06-04 이전의데이터는없답니다"
                 )
         
         # 기준 시점 결정
@@ -126,10 +126,10 @@ class SpaceService:
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="저는아마네스즈하가아닙니다"
             )
-        if target_date < date(2026, 5, 10):
+        if target_date < date(2026, 6, 4):
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="너무많이궁금해하시네요~,, 2026-05-10 이전의데이터는없답니다"
+                detail="너무많이궁금해하시네요~,, 2026-06-04 이전의데이터는없답니다"
             )
 
         # 오늘 날짜를 요청했지만 아직 06시 이전인 경우, 논리적으로 아직 전날임
