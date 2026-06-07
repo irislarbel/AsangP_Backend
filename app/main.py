@@ -3,6 +3,7 @@ import hashlib
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
+from uvicorn.middleware.proxy_headers import ProxyHeadersMiddleware
 from sqladmin import Admin, ModelView
 
 from sqladmin.authentication import AuthenticationBackend
@@ -57,6 +58,9 @@ app = FastAPI(
     openapi_url="/openapi.json" if settings.SHOW_DOCS else None,
     root_path="/asangp",
 )
+
+# Proxy Headers Middleware (HTTPS 리다이렉트 및 scheme 유지용)
+app.add_middleware(ProxyHeadersMiddleware, trusted_hosts="*")
 
 # Session Middleware (Required for sqladmin authentication)
 app.add_middleware(
