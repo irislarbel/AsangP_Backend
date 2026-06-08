@@ -91,6 +91,8 @@ class CongestionAdmin(ModelView, model=CongestionData):
 
 class RawLogAdmin(ModelView, model=RawScannerData):
     name = "ScannerRawLog"
+    page_size = 500
+    page_size_options = [100, 500, 1000, 5000, 10000]
     column_list = (
         RawScannerData.id, 
         RawScannerData.device_id, 
